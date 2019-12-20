@@ -10,30 +10,20 @@ public:
             if(str[i] != ' ')
                 break;
 
-        if(str[i] == '-')
-        {
+        if(str[i] == '-'){
             i++;
             sign = -1;
         }
-        else if(str[i] == '+')
-        {
+        else if(str[i] == '+'){
             i++;
             sign = 1;
         }
-        for(; i < str.size();i++){
-            if((str[i] <= '9' && str[i] >= '0'))
-            {
-                ret = ret * 10 + str[i] - '0';
-                if(ret >= 2147483648)
-                {
-                    if(sgin == 1)
-                        return INT_MAX;
-                    else if(sign == -1)
-                        return INT_MIN;
-                }
-            }
-            else
-                break;
+
+        for(; i < str.size(), str[i] <= '9' && str[i] >= '0';i++){
+            ret = ret * 10 + str[i] - '0';
+            if(ret >= 2147483648)
+                if(sign == 1)return INT_MAX;
+                else if(sign == -1)return INT_MIN;
         }
 
         ret *= sign;
