@@ -7,16 +7,20 @@
  * };
  */
 class Solution {
+    private:
+     ListNode* reverseList(ListNode* head, ListNode*& reverseHead) {
+         if(head == nullptr)
+             return reverseHead;
+        ListNode* orgNext = nullptr;
+        orgNext = head->next;
+        head->next = reverseHead;
+        reverseHead = head;
+        head = orgNext;
+        return reverseList(head, reverseHead);
+    }
 public:
     ListNode* reverseList(ListNode* head) {
         ListNode* reverseHead = nullptr;
-        ListNode* orgNext = nullptr;
-        while(head){
-            orgNext = head->next;
-            head->next = reverseHead;
-            reverseHead = head;
-            head = orgNext;
-        }
-        return reverseHead;
+        return reverseList(head, reverseHead);
     }
 };
