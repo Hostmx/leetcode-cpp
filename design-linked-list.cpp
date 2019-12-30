@@ -4,7 +4,8 @@ class MyLinkedList {
         struct ListNode {
             int val;
             ListNode *next;
-            ListNode(int x) : val(x), next(nullptr) {}
+            ListNode *prev;
+            ListNode(int x) : val(x), prev(nullptr), next(nullptr) {}
         };
         ListNode* fuck;
         MyLinkedList() {
@@ -47,6 +48,7 @@ class MyLinkedList {
                 cur = cur->next;
 
             cur->next = new ListNode(val);
+            cur->next->prev = cur;
         }
 
         /** Add a node of value val before the index-th node in the linked list. If index equals to the length of linked list, the node will be appended to the end of linked list. If index is greater than the length, the node will not be inserted. */
@@ -57,6 +59,8 @@ class MyLinkedList {
             {
                 ListNode* cur = new ListNode(val);
                 cur->next = fuck;
+                if(fuck)
+                    fuck->prev = cur;
                 fuck = cur;
                 return;
             }
@@ -72,6 +76,9 @@ class MyLinkedList {
                 ListNode* newNode = new ListNode(val);
                 newNode->next = cur;
                 pre->next = newNode;
+                newNode->prev = pre;
+                if(cur)
+                    cur->prev = newNode;
             }
         }
 
@@ -90,10 +97,14 @@ class MyLinkedList {
                 if(pre == cur)
                 {
                     fuck = cur->next;
+                    if(fuck)
+                        fuck->prev = nullptr;
                     delete cur;
                 }
                 else{
                     pre->next = cur->next;
+                    if(cur->next)
+                        cur->next->prev = pre;
                     delete cur;
                 }
             }
