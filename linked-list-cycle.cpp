@@ -15,11 +15,10 @@ public:
         while(tmp2)
         {
             tmp2 = tmp2->next;
-            if(tmp2 == tmp)
+            if(tmp2 != nullptr && tmp2 == tmp)
                 return true;
-            if(tmp2)
-                tmp2 = tmp2->next;
-            if(tmp2 == tmp)
+            tmp2 = tmp2->next;
+            if(tmp2 != nullptr && tmp2 == tmp)
                 return true;
             tmp = tmp->next;
         }
