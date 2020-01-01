@@ -434,7 +434,8 @@ int main()
 | Delete  |        50 |    |     |          |      |    |
 | Inorder | traversal | of | the | modified | tree |    |
 | 40      |        60 | 70 |  80 |          |      |    |
-** quicksort
+** sort
+*** quick sort
 #+BEGIN_SRC cpp
 /* C++ implementation of QuickSort */
 #include <bits/stdc++.h>
@@ -517,3 +518,680 @@ int main()
 #+RESULTS:
 | Sorted | array: |   |   |   |    |
 |      1 |      5 | 7 | 8 | 9 | 10 |
+*** heap sort
+Heap sort is a comparison based sorting technique based on Binary Heap data structure. It is similar to selection sort where we first find the maximum element and place the maximum element at the end. We repeat the same process for remaining element.
+
+What is Binary Heap?
+Let us first define a Complete Binary Tree. A complete binary tree is a binary tree in which every level, except possibly the last, is completely filled, and all nodes are as far left as possible (Source Wikipedia)
+
+A Binary Heap is a Complete Binary Tree where items are stored in a special order such that value in a parent node is greater(or smaller) than the values in its two children nodes. The former is called as max heap and the latter is called min heap. The heap can be represented by binary tree or array.
+
+
+
+Why array based representation for Binary Heap?
+Since a Binary Heap is a Complete Binary Tree, it can be easily represented as array and array based representation is space efficient. If the parent node is stored at index I, the left child can be calculated by 2 * I + 1 and right child by 2 * I + 2 (assuming the indexing starts at 0).
+
+Heap Sort Algorithm for sorting in increasing order:
+1. Build a max heap from the input data.
+2. At this point, the largest item is stored at the root of the heap. Replace it with the last item of the heap followed by reducing the size of heap by 1. Finally, heapify the root of tree.
+3. Repeat above steps while size of heap is greater than 1.
+
+How to build the heap?
+Heapify procedure can be applied to a node only if its children nodes are heapified. So the heapification must be performed in the bottom up order.
+
+Lets understand with the help of an example:
+#+BEGIN_EXAMPLE
+Input data: 4, 10, 3, 5, 1
+         4(0)
+        /   \
+     10(1)   3(2)
+    /   \
+ 5(3)    1(4)
+
+The numbers in bracket represent the indices in the array
+representation of data.
+
+Applying heapify procedure to index 1:
+         4(0)
+        /   \
+    10(1)    3(2)
+    /   \
+5(3)    1(4)
+
+Applying heapify procedure to index 0:
+        10(0)
+        /  \
+     5(1)  3(2)
+    /   \
+ 4(3)    1(4)
+The heapify procedure calls itself recursively to build heap
+ in top down manner.
+#+END_EXAMPLE
+#+BEGIN_SRC cpp
+// C++ program for implementation of Heap Sort
+#include <iostream>
+
+using namespace std;
+
+// To heapify a subtree rooted with node i which is
+// an index in arr[]. n is size of heap
+void heapify(int arr[], int n, int i)
+{
+    int largest = i; // Initialize largest as root
+    int l = 2*i + 1; // left = 2*i + 1
+    int r = 2*i + 2; // right = 2*i + 2
+
+    // If left child is larger than root
+    if (l < n && arr[l] > arr[largest])
+        largest = l;
+
+    // If right child is larger than largest so far
+    if (r < n && arr[r] > arr[largest])
+        largest = r;
+
+    // If largest is not root
+    if (largest != i)
+    {
+        swap(arr[i], arr[largest]);
+
+        // Recursively heapify the affected sub-tree
+        heapify(arr, n, largest);
+    }
+}
+
+// main function to do heap sort
+void heapSort(int arr[], int n)
+{
+    // Build heap (rearrange array)
+    for (int i = n / 2 - 1; i >= 0; i--)
+        heapify(arr, n, i);
+
+    // One by one extract an element from heap
+    for (int i=n-1; i>=0; i--)
+    {
+        // Move current root to end
+        swap(arr[0], arr[i]);
+
+        // call max heapify on the reduced heap
+        heapify(arr, i, 0);
+    }
+}
+
+/* A utility function to print array of size n */
+void printArray(int arr[], int n)
+{
+    for (int i=0; i<n; ++i)
+        cout << arr[i] << " ";
+    cout << "\n";
+}
+
+// Driver program
+int main()
+{
+    int arr[] = {12, 11, 13, 5, 6, 7};
+    int n = sizeof(arr)/sizeof(arr[0]);
+
+    heapSort(arr, n);
+
+    cout << "Sorted array is \n";
+    printArray(arr, n);
+}
+#+END_SRC
+
+#+RESULTS:
+| Sorted | array | is |    |    |    |
+|      5 |     6 |  7 | 11 | 12 | 13 |
+Notes:
+Heap sort is an in-place algorithm.
+Its typical implementation is not stable, but can be made stable (See this)
+
+Time Complexity: Time complexity of heapify is O(Logn). Time complexity of createAndBuildHeap() is O(n) and overall time complexity of Heap Sort is O(nLogn).
+
+**** Applications of HeapSort
+***** 1. Sort a nearly sorted (or K sorted) array
+   Given an array of n elements, where each element is at most k away from its target position, devise an algorithm that sorts in O(n log k) time. For example, let us consider k is 2, an element at index 7 in the sorted array, can be at indexes 5, 6, 7, 8, 9 in the given array.
+   #+BEGIN_EXAMPLE
+Input : arr[] = {6, 5, 3, 2, 8, 10, 9}
+            k = 3
+Output : arr[] = {2, 3, 5, 6, 8, 9, 10}
+
+Input : arr[] = {10, 9, 8, 7, 4, 70, 60, 50}
+         k = 4
+Output : arr[] = {4, 7, 8, 9, 10, 50, 60, 70}
+   #+END_EXAMPLE
+We can sort such arrays more efficiently with the help of Heap data structure. Following is the detailed process that uses Heap.
+1) Create a Min Heap of size k+1 with first k+1 elements. This will take O(k) time (See this GFact)
+2) One by one remove min element from heap, put it in result array, and add a new element to heap from remaining elements.
+
+Removing an element and adding a new element to min heap will take Logk time. So overall complexity will be O(k) + O((n-k)*logK)
+#+BEGIN_SRC cpp
+// A STL based C++ program to sort a nearly sorted array.
+#include <bits/stdc++.h>
+using namespace std;
+
+// Given an array of size n, where every element
+// is k away from its target position, sorts the
+// array in O(nLogk) time.
+int sortK(int arr[], int n, int k)
+{
+	// Insert first k+1 items in a priority queue (or min heap)
+	//(A O(k) operation). We assume, k < n.
+	priority_queue<int, vector<int>, greater<int> > pq(arr, arr + k + 1);
+
+	// i is index for remaining elements in arr[] and index
+	// is target index of for current minimum element in
+	// Min Heapm 'hp'.
+	int index = 0;
+	for (int i = k + 1; i < n; i++) {
+		arr[index++] = pq.top();
+		pq.pop();
+		pq.push(arr[i]);
+	}
+
+	while (pq.empty() == false) {
+		arr[index++] = pq.top();
+		pq.pop();
+	}
+}
+
+// A utility function to print array elements
+void printArray(int arr[], int size)
+{
+	for (int i = 0; i < size; i++)
+		cout << arr[i] << " ";
+	cout << endl;
+}
+
+// Driver program to test above functions
+int main()
+{
+	int k = 3;
+	int arr[] = { 2, 6, 3, 12, 56, 8 };
+	int n = sizeof(arr) / sizeof(arr[0]);
+	sortK(arr, n, k);
+
+	cout << "Following is sorted array" << endl;
+	printArray(arr, n);
+
+	return 0;
+}
+#+END_SRC
+
+#+RESULTS:
+| Following | is | sorted | array |    |    |
+|         2 |  3 |      6 |     8 | 12 | 56 |
+
+The Min Heap based method takes O(nLogk) time and uses O(k) auxiliary space.
+
+We can also use a Balanced Binary Search Tree instead of Heap to store K+1 elements. The insert and delete operations on Balanced BST also take O(Logk) time. So Balanced BST based method will also take O(nLogk) time, but the Heap bassed method seems to be more efficient as the minimum element will always be at root. Also, Heap doesn’t need extra space for left and right pointers.
+
+Please write comments if you find any of the above codes/algorithms incorrect, or find other ways to solve the same problem.
+
+***** 2. k largest(or smallest) elements in an array
+Question: Write an efficient program for printing k largest elements in an array. Elements in array can be in any order.
+For example, if given array is [1, 23, 12, 9, 30, 2, 50] and you are asked for the largest 3 elements i.e., k = 3 then your program should print 50, 30 and 23.
+
+(Use Min Heap)
+This method is mainly an optimization of method 1. Instead of using temp[] array, use Min Heap.
+
+1) Build a Min Heap MH of the first k elements (arr[0] to arr[k-1]) of the given array. O(k)
+
+2) For each element, after the kth element (arr[k] to arr[n-1]), compare it with root of MH.
+……a) If the element is greater than the root then make it root and call heapify for MH
+……b) Else ignore it.
+// The step 2 is O((n-k)*logk)
+
+3) Finally, MH has k largest elements and root of the MH is the kth largest element.
+
+Time Complexity: O(k + (n-k)Logk) without sorted output. If sorted output is needed then O(k + (n-k)Logk + kLogk)
+
+All of the above methods can also be used to find the kth largest (or smallest) element.
+#+BEGIN_SRC cpp
+#include <iostream>
+using namespace std;
+
+// Swap function to interchange
+// the value of variables x and y
+int swap(int& x, int& y)
+{
+	int temp = x;
+	x = y;
+	y = temp;
+}
+
+// Min Heap Class
+// arr holds reference to an integer
+// array size indicate the number of
+// elements in Min Heap
+class MinHeap {
+
+	int size;
+	int* arr;
+
+public:
+	// Constructor to initialize the size and arr
+	MinHeap(int size, int input[]);
+
+	// Min Heapify function, that assumes that
+	// 2*i+1 and 2*i+2 are min heap and fix the
+	// heap property for i.
+	void heapify(int i);
+
+	// Build the min heap, by calling heapify
+	// for all non-leaf nodes.
+	void buildHeap();
+};
+
+// Constructor to initialize data
+// members and creating mean heap
+MinHeap::MinHeap(int size, int input[])
+{
+	// Initializing arr and size
+
+	this->size = size;
+	this->arr = input;
+
+	// Building the Min Heap
+	buildHeap();
+}
+
+// Min Heapify function, that assumes
+// 2*i+1 and 2*i+2 are min heap and
+// fix min heap property for i
+
+void MinHeap::heapify(int i)
+{
+	// If Leaf Node, Simply return
+	if (i >= size / 2)
+		return;
+
+	// variable to store the smallest element
+	// index out of i, 2*i+1 and 2*i+2
+	int smallest;
+
+	// Index of left node
+	int left = 2 * i + 1;
+
+	// Index of right node
+	int right = 2 * i + 2;
+
+	// Select minimum from left node and
+	// current node i, and store the minimum
+	// index in smallest variable
+	smallest = arr[left] < arr[i] ? left : i;
+
+	// If right child exist, compare and
+	// update the smallest variable
+	if (right < size)
+		smallest = arr[right] < arr[smallest]
+							? right : smallest;
+
+	// If Node i violates the min heap
+	// property, swap current node i with
+	// smallest to fix the min-heap property
+	// and recursively call heapify for node smallest.
+	if (smallest != i) {
+		swap(arr[i], arr[smallest]);
+		heapify(smallest);
+	}
+}
+
+// Build Min Heap
+void MinHeap::buildHeap()
+{
+	// Calling Heapify for all non leaf nodes
+	for (int i = size / 2 - 1; i >= 0; i--) {
+		heapify(i);
+	}
+}
+
+void FirstKelements(int arr[],int size,int k){
+	// Creating Min Heap for given
+	// array with only k elements
+	MinHeap* m = new MinHeap(k, arr);
+
+	// Loop For each element in array
+	// after the kth element
+	for (int i = k; i < size; i++) {
+
+		// if current element is smaller
+		// than minimum element, do nothing
+		// and continue to next element
+		if (arr[0] > arr[i])
+			continue;
+
+		// Otherwise Change minimum element to
+		// current element, and call heapify to
+		// restore the heap property
+		else {
+			arr[0] = arr[i];
+			m->heapify(0);
+		}
+	}
+	// Now min heap contains k maximum
+	// elements, Iterate and print
+	for (int i = 0; i < k; i++) {
+		cout << arr[i] << " ";
+	}
+}
+// Driver Program
+int main()
+{
+
+	int arr[] = { 11, 3, 2, 1, 15, 5, 4,
+						45, 88, 96, 50, 45 };
+
+	int size = sizeof(arr) / sizeof(arr[0]);
+
+	// Size of Min Heap
+	int k = 3;
+
+	FirstKelements(arr,size,k);
+
+	return 0;
+}
+// This code is contributed by Ankur Goel
+
+#+END_SRC
+
+#+RESULTS:
+: 50 88 96
+*** shell sort
+ShellSort is mainly a variation of Insertion Sort. In insertion sort, we move elements only one position ahead. When an element has to be moved far ahead, many movements are involved. The idea of shellSort is to allow exchange of far items. In shellSort, we make the array h-sorted for a large value of h. We keep reducing the value of h until it becomes 1. An array is said to be h-sorted if all sublists of every h’th element is sorted.
+
+Following is the implementation of ShellSort.
+#+BEGIN_SRC cpp
+// C++ implementation of Shell Sort
+#include <iostream>
+using namespace std;
+
+/* function to sort arr using shellSort */
+int shellSort(int arr[], int n)
+{
+	// Start with a big gap, then reduce the gap
+	for (int gap = n/2; gap > 0; gap /= 2)
+	{
+		// Do a gapped insertion sort for this gap size.
+		// The first gap elements a[0..gap-1] are already in gapped order
+		// keep adding one more element until the entire array is
+		// gap sorted
+		for (int i = gap; i < n; i += 1)
+		{
+			// add a[i] to the elements that have been gap sorted
+			// save a[i] in temp and make a hole at position i
+			int temp = arr[i];
+
+			// shift earlier gap-sorted elements up until the correct
+			// location for a[i] is found
+			int j;
+			for (j = i; j >= gap && arr[j - gap] > temp; j -= gap)
+				arr[j] = arr[j - gap];
+
+			// put temp (the original a[i]) in its correct location
+			arr[j] = temp;
+		}
+	}
+	return 0;
+}
+
+void printArray(int arr[], int n)
+{
+	for (int i=0; i<n; i++)
+		cout << arr[i] << " ";
+}
+
+int main()
+{
+	int arr[] = {12, 34, 54, 2, 3}, i;
+	int n = sizeof(arr)/sizeof(arr[0]);
+
+	cout << "Array before sorting: \n";
+	printArray(arr, n);
+
+	shellSort(arr, n);
+
+	cout << "\nArray after sorting: \n";
+	printArray(arr, n);
+
+	return 0;
+}
+
+#+END_SRC
+
+#+RESULTS:
+| Array | before | sorting: |    |    |
+|    12 |     34 |       54 |  2 |  3 |
+| Array |  after | sorting: |    |    |
+|     2 |      3 |       12 | 34 | 54 |
+Time Complexity: Time complexity of above implementation of shellsort is O(n2). In the above implementation gap is reduce by half in every iteration. There are many other ways to reduce gap which lead to better time complexity. See this for more details.
+*** insertion sort
+Insertion sort is a simple sorting algorithm that works the way we sort playing cards in our hands.
+
+Algorithm
+// Sort an arr[] of size n
+insertionSort(arr, n)
+Loop from i = 1 to n-1.
+……a) Pick element arr[i] and insert it into sorted sequence arr[0…i-1]
+#+BEGIN_EXAMPLE
+12, 11, 13, 5, 6
+
+Let us loop for i = 1 (second element of the array) to 4 (last element of the array)
+
+i = 1. Since 11 is smaller than 12, move 12 and insert 11 before 12
+11, 12, 13, 5, 6
+
+i = 2. 13 will remain at its position as all elements in A[0..I-1] are smaller than 13
+11, 12, 13, 5, 6
+
+i = 3. 5 will move to the beginning and all other elements from 11 to 13 will move one position ahead of their current position.
+5, 11, 12, 13, 6
+
+i = 4. 6 will move to position after 5, and elements from 11 to 13 will move one position ahead of their current position.
+5, 6, 11, 12, 13
+
+#+END_EXAMPLE
+#+BEGIN_SRC cpp
+lter_none
+edit
+play_arrow
+
+brightness_4
+// C++ program for insertion sort
+#include <bits/stdc++.h>
+using namespace std;
+
+/* Function to sort an array using insertion sort*/
+void insertionSort(int arr[], int n)
+{
+    int i, key, j;
+    for (i = 1; i < n; i++)
+    {
+        key = arr[i];
+        j = i - 1;
+
+        /* Move elements of arr[0..i-1], that are
+        greater than key, to one position ahead
+        of their current position */
+        while (j >= 0 && arr[j] > key)
+        {
+            arr[j + 1] = arr[j];
+            j = j - 1;
+        }
+        arr[j + 1] = key;
+    }
+}
+
+// A utility function to print an array of size n
+void printArray(int arr[], int n)
+{
+    int i;
+    for (i = 0; i < n; i++)
+        cout << arr[i] << " ";
+    cout << endl;
+}
+
+/* Driver code */
+int main()
+{
+    int arr[] = { 12, 11, 13, 5, 6 };
+    int n = sizeof(arr) / sizeof(arr[0]);
+
+    insertionSort(arr, n);
+    printArray(arr, n);
+
+    return 0;
+}
+
+// This is code is contributed by rathbhupendra
+#+END_SRC
+
+#+RESULTS:
+Time Complexity: O(n*2)
+
+Auxiliary Space: O(1)
+
+Boundary Cases: Insertion sort takes maximum time to sort if elements are sorted in reverse order. And it takes minimum time (Order of n) when elements are already sorted.
+
+Algorithmic Paradigm: Incremental Approach
+
+Sorting In Place: Yes
+
+Stable: Yes
+
+Online: Yes
+
+Uses: Insertion sort is used when number of elements is small. It can also be useful when input array is almost sorted, only few elements are misplaced in complete big array.
+
+What is Binary Insertion Sort?
+We can use binary search to reduce the number of comparisons in normal insertion sort. Binary Insertion Sort uses binary search to find the proper location to insert the selected item at each iteration. In normal insertion, sorting takes O(i) (at ith iteration) in worst case. We can reduce it to O(logi) by using binary search. The algorithm, as a whole, still has a running worst case running time of O(n2) because of the series of swaps required for each insertion. Refer this for implementation.
+
+**** How to implement Insertion Sort for Linked List?
+Below is simple insertion sort algorithm for linked list.
+1) Create an empty sorted (or result) list
+2) Traverse the given list, do following for every node.
+......a) Insert current node in sorted way in sorted or result list.
+3) Change head of given linked list to head of sorted (or result) list.
+#+BEGIN_SRC cpp
+/* C program for insertion sort on a linked list */
+#include<stdio.h>
+#include<stdlib.h>
+
+/* Link list node */
+struct Node
+{
+	int data;
+	struct Node* next;
+};
+
+// Function to insert a given node in a sorted linked list
+void sortedInsert(struct Node**, struct Node*);
+
+// function to sort a singly linked list using insertion sort
+void insertionSort(struct Node **head_ref)
+{
+	// Initialize sorted linked list
+	struct Node *sorted = NULL;
+
+	// Traverse the given linked list and insert every
+	// node to sorted
+	struct Node *current = *head_ref;
+	while (current != NULL)
+	{
+		// Store next for next iteration
+		struct Node *next = current->next;
+
+		// insert current in sorted linked list
+		sortedInsert(&sorted, current);
+
+		// Update current
+		current = next;
+	}
+
+	// Update head_ref to point to sorted linked list
+	*head_ref = sorted;
+}
+
+/* function to insert a new_node in a list. Note that this
+function expects a pointer to head_ref as this can modify the
+head of the input linked list (similar to push())*/
+void sortedInsert(struct Node** head_ref, struct Node* new_node)
+{
+	struct Node* current;
+	/* Special case for the head end */
+	if (*head_ref == NULL || (*head_ref)->data >= new_node->data)
+	{
+		new_node->next = *head_ref;
+		*head_ref = new_node;
+	}
+	else
+	{
+		/* Locate the node before the point of insertion */
+		current = *head_ref;
+		while (current->next!=NULL &&
+			current->next->data < new_node->data)
+		{
+			current = current->next;
+		}
+		new_node->next = current->next;
+		current->next = new_node;
+	}
+}
+
+/* BELOW FUNCTIONS ARE JUST UTILITY TO TEST sortedInsert */
+
+/* Function to print linked list */
+void printList(struct Node *head)
+{
+	struct Node *temp = head;
+	while(temp != NULL)
+	{
+		printf("%d ", temp->data);
+		temp = temp->next;
+	}
+}
+
+/* A utility function to insert a node at the beginning of linked list */
+void push(struct Node** head_ref, int new_data)
+{
+	/* allocate node */
+	struct Node* new_node = new Node;
+
+	/* put in the data */
+	new_node->data = new_data;
+
+	/* link the old list off the new node */
+	new_node->next = (*head_ref);
+
+	/* move the head to point to the new node */
+	(*head_ref) = new_node;
+}
+
+
+// Driver program to test above functions
+int main()
+{
+	struct Node *a = NULL;
+	push(&a, 5);
+	push(&a, 20);
+	push(&a, 4);
+	push(&a, 3);
+	push(&a, 30);
+
+	printf("Linked List before sorting \n");
+	printList(a);
+
+	insertionSort(&a);
+
+	printf("\nLinked List after sorting \n");
+	printList(a);
+
+	return 0;
+}
+
+#+END_SRC
+
+#+RESULTS:
+| Linked | List | before | sorting |    |
+|     30 |    3 |      4 |      20 |  5 |
+| Linked | List |  after | sorting |    |
+|      3 |    4 |      5 |      20 | 30 |
